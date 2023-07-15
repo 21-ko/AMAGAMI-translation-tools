@@ -1,3 +1,4 @@
+REM parser_scf.py scf\0test.scf
 parser_scf.py scf\AbstractKawa.scf
 parser_scf.py scf\AbstractNaki.scf
 parser_scf.py scf\AbstractTaku.scf
