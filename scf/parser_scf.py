@@ -1,4 +1,5 @@
 import sys
+import os
 
 def extract_labels_variables_and_blocks_codes(file_path):
     with open(file_path, 'rb') as file:
@@ -120,9 +121,9 @@ def extract_labels_variables_and_blocks_codes(file_path):
     # 코드 개수 추출 (수정할 것)
     code_count = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
     offset += 2
+    # for _ in range(code_count):
+    while offset < len(scf_data): # 임시
     
-    for _ in range(code_count):
-        
         entry_type = scf_data[offset]
         offset += 1
             
@@ -168,24 +169,28 @@ def extract_labels_variables_and_blocks_codes(file_path):
             offset += length
     
     return labels, variables, blocks, codes
+    
 
 def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, blocks, codes):
-    output_file_path = f"{file_path}.txt"
+    output_directory = 'txt'
+    os.makedirs(output_directory, exist_ok=True)
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+    output_file_path = os.path.join(output_directory, f"{file_name}.txt")
     with open(output_file_path, 'w', encoding='utf-8') as file:
         file.write('====Labels====\n')
         for label in labels:
             file.write(label + '\n')
-        
+
         file.write('\n====Variables====\n')
         for variable_id, variable in variables:
             file.write(f'ID: {variable_id}, Variable: {variable}\n')
-        
+
         file.write('\n====Blocks====\n')
         for name, arg_count, data in blocks:
             file.write(f'Name: {name}\n')
             file.write(f'Arg Count: <{arg_count}>\n')
             file.write(f'Data: <{data}>\n\n')
-        
+
         file.write('\n====Codes====\n')
         for entry_type, entry_data in codes:
             file.write(f'Entry Type: {entry_type}, Entry Data: {entry_data}\n')
@@ -194,9 +199,10 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('Usage: python tool.py input_file.scf')
         sys.exit(1)
-    
+
     input_file_path = sys.argv[1]
-    
+
     labels, variables, blocks, codes = extract_labels_variables_and_blocks_codes(input_file_path)
     save_labels_variables_blocks_and_codes_to_txt(input_file_path, labels, variables, blocks, codes)
     print('레이블, 변수, 블록, 코드 추출이 완료되었습니다.')
+
