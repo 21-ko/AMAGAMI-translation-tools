@@ -133,7 +133,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
             codes.append((entry_type, 'Nil')) # 0바이트
             
         elif entry_type == 0x01 or entry_type == 0x03: # 함수 호출, 매개 변수
-            entry_data = f"0x{scf_data[offset:offset+2].hex().upper()}"
+            entry_data = f"0x{scf_data[offset:offset+4].hex().upper()}"
             codes.append((entry_type, f'<{entry_data}>')) # 4바이트 hex로 디코드
             offset += 4
             
