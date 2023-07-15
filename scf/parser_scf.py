@@ -43,8 +43,25 @@ def extract_labels_variables_and_blocks_codes(file_path):
         variable = scf_data[offset:offset+variable_length].decode('sjis')
         variables.append((variable_id, variable))
         offset += variable_length
-        
-    offset += 2 # 0x0000
+    
+    # Second Section 읽기
+    second_section = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+    offset += 2
+    
+    if second_section != 0:
+        for _ in range(second_section):
+            # 1바이트 변수 ID 읽기
+            variable_id = scf_data[offset]
+            offset += 1
+            
+            # 2바이트 변수 길이 읽기
+            variable_length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            
+            # 변수 읽기
+            variable = scf_data[offset:offset+variable_length].decode('sjis')
+            variables.append((variable_id, variable))
+            offset += variable_length
     
     # 블록 개수 추출
     block_count = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
@@ -72,9 +89,35 @@ def extract_labels_variables_and_blocks_codes(file_path):
         blocks.append((name, arg_count, data))
         offset += data_size
         
-    offset += 2 # 0x0000
+    # Second Section 2 읽기
+    second_section2 = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+    offset += 2
     
-    # 코드 개수 추출
+    if second_section2 != 0:
+        for _ in range(second_section2):
+            # 2바이트 이름 길이 읽기
+            name_length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            
+            # 이름 읽기
+            name = scf_data[offset:offset+name_length].decode('sjis')
+            offset += name_length
+            
+            # 2바이트 인수 개수 읽기
+            arg_count = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            
+            # 2바이트 데이터 크기 읽기
+            data_size = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            
+            # 데이터 읽기
+            data = scf_data[offset:offset+data_size].hex().upper()
+            blocks.append((name, arg_count, data))
+            offset += data_size
+    
+    
+    # 코드 개수 추출 (수정할 것)
     code_count = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
     offset += 2
     
