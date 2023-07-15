@@ -14,7 +14,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
     offset = 3  # SCF 문자열 다음 바이트부터 시작
     
     # 3바이트 레이블 헤더 추출
-    header_hex = scf_data[offset:offset+3].hex().upper()
+    header_hex = f"0x{scf_data[offset:offset+3].hex().upper()}"
     labels.append(f'<{header_hex}>')
     offset += 3
     
@@ -88,7 +88,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
         offset += 2
         
         # 데이터 읽기
-        data = scf_data[offset:offset+data_size].hex().upper()
+        data = f"0x{scf_data[offset:offset+data_size].hex().upper()}"
         blocks.append((name, arg_count, data))
         offset += data_size
         
@@ -115,7 +115,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
             offset += 2
             
             # 데이터 읽기
-            data = scf_data[offset:offset+data_size].hex().upper()
+            data = f"0x{scf_data[offset:offset+data_size].hex().upper()}"
             second_section_of_the_blocks.append((name, arg_count, data))
             offset += data_size
     
@@ -133,7 +133,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
             codes.append((entry_type, 'Nil')) # 0바이트
             
         elif entry_type == 0x01 or entry_type == 0x03: # 함수 호출, 매개 변수
-            entry_data = scf_data[offset:offset+4].hex().upper()
+            entry_data = f"0x{scf_data[offset:offset+2].hex().upper()}"
             codes.append((entry_type, f'<{entry_data}>')) # 4바이트 hex로 디코드
             offset += 4
             
@@ -157,7 +157,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
         
         elif entry_type == 0x08:
             # 엔트리 데이터 읽기
-            entry_data = scf_data[offset:offset+2].hex().upper()
+            entry_data = f"0x{scf_data[offset:offset+2].hex().upper()}"
             codes.append((entry_type, f'<{entry_data}>')) # 2바이트 hex로 디코드
             offset += 2
             
@@ -174,42 +174,42 @@ def extract_labels_variables_and_blocks_codes(file_path):
     
 
 def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, blocks, codes, second_section_of_the_variables, second_section_of_the_blocks):
-    output_directory = 'txt'
+    output_directory = 'tsv'
     os.makedirs(output_directory, exist_ok=True)
     file_name = os.path.splitext(os.path.basename(file_path))[0]
-    output_file_path = os.path.join(output_directory, f"{file_name}.txt")
+    output_file_path = os.path.join(output_directory, f"{file_name}.tsv")
     with open(output_file_path, 'w', encoding='utf-8') as file:
-        file.write('====Labels====\n')
+        file.write('[Labels]\n')
         for label in labels:
             file.write(label + '\n')
 
-        file.write('\n====Variables====\n')
+        file.write('\n[Variables]\n')
         for variable_id, variable in variables:
-            file.write(f'ID: {variable_id}, Variable: {variable}\n')
+            file.write(f'ID\t{variable_id}\tVariable\t{variable}\n')
             
-        file.write('\n===Second section of the variables===\n')
+        file.write('\n[Second section of the variables]\n')
         for variable_id, variable in second_section_of_the_variables:
-            file.write(f'ID: {variable_id}, Variable: {variable}\n')
+            file.write(f'ID\t{variable_id}\tVariable\t{variable}\n')
 
-        file.write('\n====Blocks====\n')
+        file.write('\n[Blocks]\n')
         for name, arg_count, data in blocks:
-            file.write(f'Name: {name}\n')
-            file.write(f'Arg Count: <{arg_count}>\n')
-            file.write(f'Data: <{data}>\n\n')
+            file.write(f'Name\t{name}\n')
+            file.write(f'Arg Count\t{arg_count}\n')
+            file.write(f'Data\t<{data}>\n\n')
         
-        file.write('\n===Second section of the blocks===\n')
+        file.write('\n[Second section of the blocks]\n')
         for name, arg_count, data in second_section_of_the_blocks:
-            file.write(f'Name: {name}\n')
-            file.write(f'Arg Count: <{arg_count}>\n')
-            file.write(f'Data: <{data}>\n\n')
+            file.write(f'Name\t{name}\n')
+            file.write(f'Arg Count\t{arg_count}\n')
+            file.write(f'Data\t<{data}>\n\n')
 
-        file.write('\n====Codes====\n')
+        file.write('\n[Codes]\n')
         for entry_type, entry_data in codes:
-            file.write(f'Entry Type: {entry_type}, Entry Data: {entry_data}\n')
+            file.write(f'Entry Type\t{entry_type}\tEntry Data\t{entry_data}\n')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: python tool.py input_file.scf')
+        print('Usage: python parser_scf.py input_file.scf')
         sys.exit(1)
 
     input_file_path = sys.argv[1]
