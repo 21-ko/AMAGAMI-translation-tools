@@ -76,34 +76,49 @@ def extract_labels_variables_and_blocks_codes(file_path):
     
     # 코드 개수 추출
     code_count = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
-    code_count2 = code_count + 2
     offset += 2
     
-    for _ in range(code_count2):
+    for _ in range(code_count):
         
         entry_type = scf_data[offset]
         offset += 1
             
         if entry_type == 0x00 or entry_type == 0x02 or entry_type == 0x04:
-            codes.append((entry_type, 'Nil'))
-            offset += 1
+            codes.append((entry_type, 'Nil')) # 0바이트
             
-        elif entry_type == 0x01 or entry_type == 0x03:
+        elif entry_type == 0x01 or entry_type == 0x03: # 함수 호출, 매개 변수
             entry_data = scf_data[offset:offset+4].hex().upper()
-            codes.append((entry_type, entry_data))
+            codes.append((entry_type, f'<{entry_data}>')) # 4바이트 hex로 디코드
             offset += 4
+            
+        elif entry_type == 0x05: # 텍스트
+            # 2바이트 길이 읽기
+            length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            # 문자 읽기
+            entry_data = scf_data[offset:offset+length].decode('sjis')
+            codes.append((entry_type, entry_data))
+            offset += length
+            
+        elif entry_type == 0x06 or entry_type == 0x07: # 함수 이름
+            # 2바이트 길이 읽기
+            length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
+            offset += 2
+            # 문자 읽기
+            entry_data = scf_data[offset:offset+length].decode('sjis')
+            codes.append((entry_type, entry_data))
+            offset += length
         
         elif entry_type == 0x08:
             # 엔트리 데이터 읽기
             entry_data = scf_data[offset:offset+2].hex().upper()
-            codes.append((entry_type, entry_data))
+            codes.append((entry_type, f'<{entry_data}>')) # 2바이트 hex로 디코드
             offset += 2
             
         else:
             # 2바이트 길이 읽기
             length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
             offset += 2
-            
             # 문자 읽기
             entry_data = scf_data[offset:offset+length].decode('sjis')
             codes.append((entry_type, entry_data))
@@ -134,7 +149,7 @@ def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: python parser_scf.py input_file.scf')
+        print('Usage: python tool.py input_file.scf')
         sys.exit(1)
     
     input_file_path = sys.argv[1]
@@ -142,4 +157,3 @@ if __name__ == '__main__':
     labels, variables, blocks, codes = extract_labels_variables_and_blocks_codes(input_file_path)
     save_labels_variables_blocks_and_codes_to_txt(input_file_path, labels, variables, blocks, codes)
     print('레이블, 변수, 블록, 코드 추출이 완료되었습니다.')
-
