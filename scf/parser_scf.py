@@ -7,7 +7,9 @@ def extract_labels_variables_and_blocks_codes(file_path):
     
     labels = []
     variables = []
+    second_section_of_the_variables = []
     blocks = []
+    second_section_of_the_blocks = []
     codes = []
     offset = 3  # SCF 문자열 다음 바이트부터 시작
     
@@ -61,7 +63,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
             
             # 변수 읽기
             variable = scf_data[offset:offset+variable_length].decode('sjis')
-            variables.append((variable_id, variable))
+            second_section_of_the_variables.append((variable_id, variable))
             offset += variable_length
     
     # 블록 개수 추출
@@ -114,7 +116,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
             
             # 데이터 읽기
             data = scf_data[offset:offset+data_size].hex().upper()
-            blocks.append((name, arg_count, data))
+            second_section_of_the_blocks.append((name, arg_count, data))
             offset += data_size
     
     
@@ -168,10 +170,10 @@ def extract_labels_variables_and_blocks_codes(file_path):
             codes.append((entry_type, entry_data))
             offset += length
     
-    return labels, variables, blocks, codes
+    return labels, variables, blocks, codes, second_section_of_the_variables, second_section_of_the_blocks
     
 
-def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, blocks, codes):
+def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, blocks, codes, second_section_of_the_variables, second_section_of_the_blocks):
     output_directory = 'txt'
     os.makedirs(output_directory, exist_ok=True)
     file_name = os.path.splitext(os.path.basename(file_path))[0]
@@ -184,9 +186,19 @@ def save_labels_variables_blocks_and_codes_to_txt(file_path, labels, variables, 
         file.write('\n====Variables====\n')
         for variable_id, variable in variables:
             file.write(f'ID: {variable_id}, Variable: {variable}\n')
+            
+        file.write('\n===Second section of the variables===\n')
+        for variable_id, variable in second_section_of_the_variables:
+            file.write(f'ID: {variable_id}, Variable: {variable}\n')
 
         file.write('\n====Blocks====\n')
         for name, arg_count, data in blocks:
+            file.write(f'Name: {name}\n')
+            file.write(f'Arg Count: <{arg_count}>\n')
+            file.write(f'Data: <{data}>\n\n')
+        
+        file.write('\n===Second section of the blocks===\n')
+        for name, arg_count, data in second_section_of_the_blocks:
             file.write(f'Name: {name}\n')
             file.write(f'Arg Count: <{arg_count}>\n')
             file.write(f'Data: <{data}>\n\n')
@@ -202,7 +214,6 @@ if __name__ == '__main__':
 
     input_file_path = sys.argv[1]
 
-    labels, variables, blocks, codes = extract_labels_variables_and_blocks_codes(input_file_path)
-    save_labels_variables_blocks_and_codes_to_txt(input_file_path, labels, variables, blocks, codes)
+    labels, variables, blocks, codes, second_section_of_the_variables, second_section_of_the_blocks = extract_labels_variables_and_blocks_codes(input_file_path)
+    save_labels_variables_blocks_and_codes_to_txt(input_file_path, labels, variables, blocks, codes, second_section_of_the_variables, second_section_of_the_blocks)
     print('레이블, 변수, 블록, 코드 추출이 완료되었습니다.')
-
