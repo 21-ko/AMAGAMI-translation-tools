@@ -50,6 +50,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
     offset += 2
     
     if second_section != 0:
+        labels.append("[Second Section]")
         for _ in range(second_section):
             # 1바이트 변수 ID 읽기
             variable_id = scf_data[offset]
@@ -95,6 +96,7 @@ def extract_labels_variables_and_blocks_codes(file_path):
     offset += 2
     
     if second_section2 != 0:
+        labels.append("[Second Section]")
         for _ in range(second_section2):
             # 2바이트 이름 길이 읽기
             name_length = int.from_bytes(scf_data[offset:offset+2], byteorder='little')
