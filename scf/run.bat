@@ -44,7 +44,7 @@ parser_scf.py scf\CtrlException.scf
 parser_scf.py scf\GalleryView.scf
 parser_scf.py scf\Hai.scf
 parser_scf.py scf\Kawa.scf
-parser_scf.py scf\MahjongDebug.scf
+REM parser_scf.py scf\MahjongDebug.scf
 parser_scf.py scf\MahjongMain.scf
 parser_scf.py scf\MahjongObject.scf
 parser_scf.py scf\MahjongPop.scf
