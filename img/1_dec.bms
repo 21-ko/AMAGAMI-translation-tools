@@ -1,0 +1,6 @@
+comtype lzss "11 5 2 2 0"
+get SIZE long
+savepos OFFSET
+get ZSIZE asize
+math ZSIZE - OFFSET
+clog "decompressed_amagami.img" OFFSET ZSIZE SIZE

@@ -1,0 +1,12 @@
+comtype lzss_compress "11 5 2 2 0"
+get SIZE asize
+log MEMORY_FILE 0 0
+put SIZE long MEMORY_FILE
+get NAME basename
+get EXT extension
+string NAME p "amagami.%s" EXT
+append
+clog MEMORY_FILE 0 SIZE SIZE
+append
+get SIZE asize MEMORY_FILE
+log NAME 0 SIZE MEMORY_FILE
